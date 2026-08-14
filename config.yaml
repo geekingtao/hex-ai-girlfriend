@@ -1,0 +1,63 @@
+# hex-ai-girlfriend 编排层配置
+# 引擎全部可插拔：改 engine 字段即可切换，无需改代码
+
+server:
+  host: 0.0.0.0
+  port: 7860
+  greeting: "现在，主动跟他打个招呼。用一句话，口语化、有亲密感，不要书面语，不要用 emoji。"  # 连接后由服务器主动发起的开场白（prompt 给 LLM）；留空=不主动开口
+
+# ---------- 人设 ----------
+persona:
+  file: persona.md          # 人设文件，改这里即可
+  no_think: true            # Qwen3 专用：关闭思考模式（追加 /no_think）
+
+# ---------- 大模型（LLM） ----------
+llm:
+  engine: llamacpp          # llamacpp | test
+  base_url: http://127.0.0.1:8200/v1   # Windows 侧 llama-server 的 OpenAI 兼容地址；WSL2 下 127.0.0.1 连不上会自动回退到默认网关(Windows 主机 IP)；端口只在这里改
+  api_key: ""
+  model: ""                 # 留空 = 用 llama-server 加载的默认模型（推荐 8B + KV 量化）
+  temperature: 1.0
+  top_p: 0.95
+  max_tokens: 256 
+
+# ---------- 语音识别（STT） ----------
+stt:
+  engine: sensevoice        # sensevoice | test
+  model: iic/SenseVoiceSmall     # 优先用包内 models/SenseVoiceSmall（离线），没有则 funasr 自动下载
+  device: auto              # auto = 有 GPU 自动用 cuda:0，无 GPU 自动落 cpu（int8 下 CPU 也可跑）；想强制可写死 cuda:0 或 cpu
+  quantize: true            # int8 量化，省显存
+  language: zh
+
+# ---------- 语音合成（TTS） ----------
+tts:
+  engine: cosyvoice         # cosyvoice | test
+  cosyvoice_repo: ./third_party/CosyVoice    # 已 clone 的 CosyVoice 仓库路径
+  model_dir: ./models/CosyVoice2-0.5B  # CosyVoice2 模型目录（下载后放进包内 models/ 下，见 config 注释）
+  ref_wav: data/prompt1.mp3
+  ref_text: "呜呜, 你怎么才回来呀, 人家等你等得都快成望夫石了。手机都要刷爆了，就是没有你的消息，哼，坏蛋！"  # 必填：与 ref.wav 录音逐字一致（联调用原项目音色，发布时换成自己的）
+  instruct: "带点撒娇 轻微抱怨的语气说"              # 可选：情感指令，如：带点撒娇的语气说
+  device: cuda:0
+  speed: 1.0
+  chunk_ms: 0               # 0=整段合成完一次送数字人（整段入队，播放无块间停顿/卡顿）；>0=每块一到就送（降首响，但 CosyVoice 流式解码的块间停顿会暴露成播放卡顿）
+
+# ---------- VAD（端点检测手感） ----------
+vad:
+  sample_rate: 16000
+  device: cpu               # silero VAD 跑 CPU，不占显存
+  threshold: 0.5            # 人声判定门槛，环境吵调高
+  min_speech_ms: 500        # 最短有效语音
+  min_silence_ms: 1200      # 停顿多久算说完（抢答就调大）
+  pad_ms: 300               # 语音前保留的音频
+  min_turn_secs: 0.2        # 短于该时长的语音丢弃
+
+# ---------- 数字人（LiveTalking 口型） ----------
+avatar:
+  base_url: http://127.0.0.1:8010
+  ignore_self_ms: 600       # 开始说话后 N ms 内忽略 VAD 触发（防数字人自触发）
+  subtitle_hide_delay_ms: 3000   # 字幕静音判定：语音停止后延迟多久才让字幕消失。消化句内停顿，避免「才说两三个字一停字幕就闪没」；字幕消失可略迟于语音结束。调大→字幕挂得更久
+
+# ---------- 记忆 ----------
+memory:
+  turns: 4                  # 记住最近几轮对话
+

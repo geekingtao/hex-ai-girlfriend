@@ -1,0 +1,57 @@
+/* ============================================================================
+ * layout.css — 布局改造：左侧 orb 交互 UI，右侧 LiveTalking 数字人
+ * 数字人与 UI 之间用水平渐变过渡（数字人左缘淡出）。
+ * ========================================================================== */
+
+/* ---- 数字人层（右下，占满右侧，pointer-events:none 不挡交互） ---- */
+#av-layer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 55%;
+  z-index: 0;
+  background: #000;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+#av-layer.live { opacity: 1; }
+
+#av-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 55% 45%;
+  /* 左缘水平渐变淡出 → 与左侧 UI 平滑过渡 */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
+}
+
+/* ---- 交互 UI 收进左 45% ---- */
+#app { position: relative; z-index: 1; }
+
+.topbar, .stage, .footer {
+  width: 45%;
+}
+
+.stage { margin-right: auto; }
+
+/* ---- 聊天气泡：从右上挪到左下，避开右侧数字人 ---- */
+.bubble-stack {
+  top: auto;
+  right: auto;
+  bottom: 108px;
+  left: 28px;
+}
+
+/* ---- 小屏：数字人退为纯背景淡化，保证 orb 可用 ---- */
+@media (max-width: 700px) {
+  #av-layer { width: 100%; opacity: .55; }
+  #av-layer.live { opacity: .55; }
+  .topbar, .stage, .footer { width: auto; }
+  .bubble-stack { left: 16px; right: 16px; bottom: 96px; width: auto; }
+}

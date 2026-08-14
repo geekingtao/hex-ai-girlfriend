@@ -1,0 +1,39 @@
+# hex-girlfriend 依赖（核心 + CosyVoice2 推理运行时，合并自原 requirements-cosyvoice.txt）
+# PyTorch 单独装 cu124，见 install.sh
+
+# ---------- 编排层核心 ----------
+fastapi
+uvicorn[standard]
+httpx
+pyyaml
+numpy
+
+# ---------- 语音识别（SenseVoice，funasr 生态） ----------
+funasr
+modelscope
+
+# ---------- CosyVoice2-0.5B 推理运行时 ----------
+# 裁剪自 CosyVoice/requirements.txt，只保留 tts.py 推理路径真正 import 的库。
+# torch / torchaudio 由 install.sh 单独安装（2.5.0 cu124），不在此列。
+# 排除：deepspeed/tensorrt/gradio/vllm/x-transformers 等训练演示组件，
+#       以及 CosyVoice 钉死的 torch==2.3.1（会降级我们装的 2.5.0）。
+# 注意：pyarrow 与 pyworld 不能排除——cosyvoice2.yaml 用 !name:cosyvoice.dataset.processor.*
+#       引用数据集函数，hyperpyyaml 解析时会整个导入 processor 模块，顶层 import 就是这两个。
+# setuptools<81：pyworld 0.3.4 顶层 import pkg_resources，而 setuptools>=81 已移除它。
+einops
+pyarrow==18.1.0
+pyworld==0.3.4
+setuptools<81
+hyperpyyaml
+inflect
+# CosyVoice 文本前处理（frontend.py 运行时 import，缺了会 fallback 到 text_frontend=''，
+# 中文数字/日期不归一化，如 "25" 按字母逐个读）。原依赖列表里就有的，裁剪时误删了。
+wetext==0.0.4
+matcha-tts
+omegaconf
+onnxruntime-gpu==1.19.2
+scipy
+tiktoken
+tqdm
+transformers==4.51.3
+openai-whisper

@@ -1,0 +1,21 @@
+# 大模型权重 / 模型目录（不上传）
+models/*
+!models/silero-vad/
+*.pth
+*.tar.gz
+*.onnx
+*.gguf
+
+# Python 缓存 / 虚拟环境
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 临时草稿 / 日志
+_rest_*.py
+_measure_*.py
+_test_*.py
+_verify_*.py
+_reverse_report.txt
+*.log

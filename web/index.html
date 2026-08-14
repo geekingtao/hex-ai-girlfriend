@@ -1,0 +1,190 @@
+<!doctype html>
+<!--
+  Hex AI Girlfriend — 本地实时数字人语音对话 (Realtime AI Digital Girlfriend)
+  Copyright (C) 2026 Hex-电脑课堂 (Hex Computer Classroom)
+  YouTube: https://www.youtube.com/channel/UC2s3nBn_v4So9-8GQORMDhA
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>AI Cyber Girlfriend · 实时语音对话</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/layout.css" />
+  </head>
+  <!-- `booting` 关闭过渡/动画直到首帧绘制完，避免 orb 开场闪现 -->
+  <body class="booting">
+    <!-- 数字人舞台：右侧，左侧渐变过渡融入 UI（digital-avatar.js 注入 <video>） -->
+    <div id="av-layer" aria-hidden="true"></div>
+
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="ident">
+            <div class="ident-head">
+              <span class="ident-title">AI Cyber Girlfriend</span>
+            </div>
+            <p class="ident-blurb"><a href="https://www.youtube.com/@hexcomputercourse999" target="_blank" rel="noopener">Youtube：Hex-电脑课堂 · 欢迎订阅</a></p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button id="fullscreen-btn" class="icon-btn" title="全屏" aria-label="全屏">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+          </button>
+          <button id="chat-btn" class="icon-btn" title="对话记录" aria-label="对话记录">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span id="chat-badge" class="chat-badge" aria-hidden="true"></span>
+          </button>
+          <button id="settings-btn" class="icon-btn" title="设置" aria-label="设置">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .66.39 1.25 1 1.51H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="stage">
+        <div class="orb-wrap">
+          <div id="mic-gate" class="mic-gate">
+            <svg id="mic-gate-arc" class="mic-gate-arc" viewBox="0 0 100 100" aria-hidden="true">
+              <path id="mga-track" class="mga-track" fill="none" />
+              <path id="mga-fill" class="mga-fill" fill="none" />
+              <path id="mga-hit" class="mga-hit" fill="none" />
+              <circle id="mga-handle" class="mga-handle" r="3" />
+            </svg>
+            <button id="mic-btn" class="side-btn" type="button" aria-label="静音" title="静音" aria-hidden="true">
+              <svg class="mic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+              <svg class="mic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M9 5a3 3 0 0 1 6 0v4"/><path d="M9 10v1a3 3 0 0 0 5.1 2.1"/><path d="M19 10a7 7 0 0 1-1.24 3.97"/><path d="M5 10a7 7 0 0 0 11 5.67"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+          </div>
+
+          <button id="main-circle" class="circle state-idle" type="button" aria-label="开始语音对话">
+            <span class="circle-glow" aria-hidden="true"></span>
+            <span class="circle-ring" aria-hidden="true"></span>
+            <span class="circle-ring-outer" aria-hidden="true"></span>
+            <span class="circle-core">
+              <span class="circle-indicator" aria-hidden="true">
+                <svg class="ind ind-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor" stroke="none"/>
+                  <path d="M5 10a7 7 0 0 0 14 0"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                  <line x1="8" y1="22" x2="16" y2="22"/>
+                </svg>
+                <svg class="ind ind-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+                <span class="ind ind-spinner"></span>
+                <span class="ind ind-thinking">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </span>
+                <span class="ind ind-bars">
+                  <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                </span>
+                <svg class="ind ind-voice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 10v4a1 1 0 0 0 1 1h3l5 4V5L7 9H4a1 1 0 0 0-1 1z" fill="currentColor" stroke="none"/>
+                  <path class="wave wave-1" d="M16 8a5 5 0 0 1 0 8"/>
+                  <path class="wave wave-2" d="M19 5a9 9 0 0 1 0 14"/>
+                </svg>
+              </span>
+            </span>
+          </button>
+
+          <button id="stop-btn" class="side-btn" type="button" aria-label="结束" title="结束" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+          </button>
+        </div>
+
+        <p id="circle-caption" class="circle-caption" role="status">点击开始对话</p>
+        <p id="circle-subcaption" class="circle-subcaption" hidden></p>
+      </main>
+    </div>
+
+    <!-- 聊天气泡（layout.css 移到左下角，避开右侧数字人） -->
+    <div id="bubble-stack" class="bubble-stack" aria-live="polite" aria-atomic="false"></div>
+
+    <!-- 对话记录面板 -->
+    <div id="chat-panel" class="chat-panel">
+      <div id="chat-panel-backdrop" class="chat-panel-backdrop"></div>
+      <div class="chat-panel-inner">
+        <header class="chat-panel-header">
+          <h3>对话记录</h3>
+          <button id="chat-panel-close" class="icon-btn" aria-label="关闭">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </header>
+        <div id="chat-history" class="chat-history"></div>
+      </div>
+    </div>
+
+    <dialog id="settings-modal" class="modal">
+      <form method="dialog" class="modal-content">
+        <header class="modal-header">
+          <h2>设置</h2>
+          <button class="icon-btn" value="close" aria-label="关闭">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </header>
+
+        <div class="tab-panels">
+          <section class="tab-panel active" role="tabpanel">
+            <div class="field-row">
+              <label class="field">
+                <span>麦克风</span>
+                <select id="audio-input"><option value="">系统默认</option></select>
+                <small>下次对话（或点「保存并重连」）生效</small>
+              </label>
+            </div>
+
+            <label class="field" id="audio-output-field">
+              <span>扬声器</span>
+              <select id="audio-output"><option value="">系统默认</option></select>
+              <small id="audio-output-hint">助手语音播放到哪里；Chrome/Edge 支持即时切换</small>
+            </label>
+
+            <label class="field">
+              <span>数字人 ID（形象）</span>
+              <input id="avatar-id" type="text" spellcheck="false" placeholder="wav2lip256_avatar1" />
+              <small>填 LiveTalking /index.html 里生成的数字人 ID；保存后立即重连生效</small>
+            </label>
+
+            <div class="field">
+              <span class="field-head">
+                噪音门限
+                <span id="gate-value" class="field-value">关</span>
+              </span>
+              <div class="gate">
+                <div class="gate-track" aria-hidden="true">
+                  <div id="gate-meter-fill" class="gate-meter-fill"></div>
+                  <input id="noise-gate" type="range" min="-66" max="-3" step="1" value="-50" aria-label="噪音门限阈值" />
+                </div>
+                <div class="gate-ends"><span>关</span><span>−3 dB</span></div>
+              </div>
+              <small>低于门限的杂音不发送；拖到最左关闭</small>
+            </div>
+
+            <label class="field checkbox">
+              <input id="subtitles-toggle" type="checkbox" checked />
+              <span>显示字幕</span>
+              <small>对话时显示她的语音字幕（仅气泡，不影响对话记录）</small>
+            </label>
+
+            <label class="field">
+              <span>人设（系统提示词）</span>
+              <textarea id="instructions" rows="6" spellcheck="false" placeholder="你是……"></textarea>
+              <small>修改后点「保存并重连」生效</small>
+            </label>
+
+            <div class="field">
+              <button id="restart-conversation" type="button" class="btn primary wide" disabled>保存并重连</button>
+              <small id="restart-hint">连接后回来可应用修改</small>
+            </div>
+          </section>
+        </div>
+
+        <footer class="modal-footer">
+          <button id="settings-save" type="submit" class="btn primary" value="save">保存</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="/digital-avatar.js"></script>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
