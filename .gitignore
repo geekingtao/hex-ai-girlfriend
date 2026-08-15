@@ -1,6 +1,6 @@
 # 大模型权重 / 模型目录（不上传）
-models/*
-!models/silero-vad/
+/models/*
+!/models/silero-vad/
 *.pth
 *.tar.gz
 *.onnx
