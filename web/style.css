@@ -1704,8 +1704,9 @@ body.cam-on .footer {
   z-index: 100;
 }
 
-/* 「显示字幕」关闭（body.no-subtitles）：隐藏她的语音气泡，用户/工具气泡保留 */
-body.no-subtitles .bubble.assistant {
+/* 「显示字幕」关闭（body.no-subtitles）：隐藏她/你的语音字幕气泡（含 STT 字幕），工具气泡保留 */
+body.no-subtitles .bubble.assistant,
+body.no-subtitles .bubble.user {
   display: none;
 }
 
