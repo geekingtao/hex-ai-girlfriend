@@ -34,7 +34,7 @@
 
 ### 🖼️ Preview
 
-![Project preview](data/picture_1.png)
+![Project preview](data/picture_2.png)
 
 > Open `http://localhost:7860` in your browser → click **"Start"** → allow the microphone → start talking.
 
