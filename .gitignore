@@ -19,3 +19,6 @@ _test_*.py
 _verify_*.py
 _reverse_report.txt
 *.log
+
+# 备份目录（不上传）
+.bak-*/

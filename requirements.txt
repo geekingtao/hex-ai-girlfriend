@@ -29,7 +29,8 @@ inflect
 # CosyVoice 文本前处理（frontend.py 运行时 import，缺了会 fallback 到 text_frontend=''，
 # 中文数字/日期不归一化，如 "25" 按字母逐个读）。原依赖列表里就有的，裁剪时误删了。
 wetext==0.0.4
-matcha-tts
+matcha-tts==0.0.7.2
+diffusers==0.39.0
 omegaconf
 onnxruntime-gpu==1.19.2
 scipy

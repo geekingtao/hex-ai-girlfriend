@@ -68,6 +68,7 @@ uv pip install --python third_party/livetalking/.venv-lt/bin/python -r third_par
 # ---------------------------------------------------------------- [5/6] 放置模型/形象
 say "[5/6] 放置模型与数字人形象"
 if [ ! -f "third_party/livetalking/models/wav2lip.pth" ]; then
+  mkdir -p "third_party/livetalking/models"
   cp "models/wav2lip256.pth" "third_party/livetalking/models/wav2lip.pth"
   dim "  models/wav2lip256.pth → third_party/livetalking/models/wav2lip.pth"
 fi
